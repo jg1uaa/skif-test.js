@@ -2,8 +2,7 @@
 
 ## Description
 
-Morse decoder for practice use, with [SKIF](https://github.com/jg1uaa/skif-ardui
-no) (simple key interface), DTR/DSR line and HID (Keyboard/Mouse).
+Morse decoder for practice use, with [SKIF](https://github.com/jg1uaa/skif-arduino) (simple key interface), DTR/DSR line and HID (Keyboard/Mouse).
 
 ## Usage
 
