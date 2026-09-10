@@ -112,8 +112,6 @@ async function do_main() {
     let last_sw = -1;
     let runningTimer = null;
 
-    print("ready.\n\n");
-
     while (true) {
         const event = await queue.pop();
 
@@ -151,8 +149,13 @@ async function main() {
     if (iface == "dsr") device = new DSRSignal(queue);
     else device = new HIDDevice(queue);
 
-    await device.open();
-    await do_main();
+    try {
+        await device.open();
+        print("ready.\n\n");
+        await do_main();
+    } catch (error) {
+        print("not ready. (reload to retry)\n\n");
+    }
 }
 
 window.addEventListener("DOMContentLoaded", () => {

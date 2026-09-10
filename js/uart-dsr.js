@@ -58,6 +58,7 @@ export class DSRSignal {
         } catch (error) {
             console.error("serial port open error", error);
             this.running = false;
+            throw error;
         }
     }
 
