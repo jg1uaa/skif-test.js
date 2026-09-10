@@ -10,67 +10,67 @@ export class DSRSignal {
     running = false;
 
     constructor(eventQueue) {
-	this.queue = eventQueue;
+        this.queue = eventQueue;
     }
 
     async loop() {
-	while (this.running) {
-	    try {
-		const signals = await this.serialPort.getSignals();
-		const state = Number(signals.dataSetReady);
+        while (this.running) {
+            try {
+                const signals = await this.serialPort.getSignals();
+                const state = Number(signals.dataSetReady);
 
-		if (state !== this.lastState) {
-		    const currentTime = performance.now();
+                if (state !== this.lastState) {
+                    const currentTime = performance.now();
 
-		    if (!this.isFirstPress) {
-			this.queue.push({
-			    state: this.lastState,
-			    elapsed_time_ms: currentTime - this.lastTime
-			});
-		    }
-		    this.lastState = state;
-		    this.lastTime = currentTime;
-		    this.isFirstPress = false;
-		}
-	    } catch (error) {
-		console.error("serial port access error", error);
-		break;
-	    }
+                    if (!this.isFirstPress) {
+                        this.queue.push({
+                            state: this.lastState,
+                            elapsed_time_ms: currentTime - this.lastTime
+                        });
+                    }
+                    this.lastState = state;
+                    this.lastTime = currentTime;
+                    this.isFirstPress = false;
+                }
+            } catch (error) {
+                console.error("serial port access error", error);
+                break;
+            }
 
-	    // wait for event loop
-	    await new Promise(resolve => queueMicrotask(resolve));
-	}
+            // wait for event loop
+            await new Promise(resolve => queueMicrotask(resolve));
+        }
     }
 
     async open() {
-	this.isFirstPress = true;
-	this.running = true;
+        this.isFirstPress = true;
+        this.running = true;
 
-	try {
-	    this.serialPort = await navigator.serial.requestPort();
-	    await this.serialPort.open({ baudRate: 9600 });
+        try {
+            this.serialPort = await navigator.serial.requestPort();
+            await this.serialPort.open({ baudRate: 9600 });
 
-	    const signals = await this.serialPort.getSignals();
-	    this.lastState = Number(signals.dataSetReady);
-	    this.lastTime = performance.now();
+            const signals = await this.serialPort.getSignals();
+            this.lastState = Number(signals.dataSetReady);
+            this.lastTime = performance.now();
 
-	    this.loop();
-	} catch (error) {
-	    console.error("serial port open error", error);
-	    this.running = false;
-	}
+            this.loop();
+        } catch (error) {
+            console.error("serial port open error", error);
+            this.running = false;
+        }
     }
 
     async close() {
-	this.running = false;
+        this.running = false;
 
-	if (this.serialPort) {
-	    try {
-		await this.serialPort.close();
-	    } catch (error) {
-		console.error("serial port close error", error);
-	    }
-	    this.serialPort = null;
-	}
+        if (this.serialPort) {
+            try {
+                await this.serialPort.close();
+            } catch (error) {
+                console.error("serial port close error", error);
+            }
+            this.serialPort = null;
+        }
     }
 }

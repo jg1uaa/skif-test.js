@@ -45,15 +45,15 @@ function print(str) {
 function simple_display(c)
 {
     if (c != SPACE_GOOD && !isDecodeFinish(c)) {
-	print(c);
+        print(c);
     }
 
     if (isDecodeFinish(c)) {
-	print(" [" + decoder.decode(decode_buffer) + "] ");
+        print(" [" + decoder.decode(decode_buffer) + "] ");
     }
 
     if (c == WORD_SPACE) {
-	print("\n");
+        print("\n");
     }
 }
 
@@ -62,7 +62,7 @@ function verbose_display(c, msec)
     print(c + " " + String(msec) + "\n");
 
     if (isDecodeFinish(c)) {
-	print("* " + decode_buffer + " [" + decoder.decode(decode_buffer) + "]\n\n");
+        print("* " + decode_buffer + " [" + decoder.decode(decode_buffer) + "]\n\n");
     }
 }
 
@@ -70,41 +70,41 @@ function push_status(state, msec) {
     let c = "";
 
     if(state) {
-	if (msec < basetime_ms * 0.5) c = DIT_TOO_SHORT;
-	else if (msec < basetime_ms * 1.5) c = DIT_GOOD;
-	else if (msec < basetime_ms * 2) c = DIT_OR_DAH;
-	else if (msec < basetime_ms * 6) c = DAH_GOOD;
-	else c = DAH_TOO_LONG;
+        if (msec < basetime_ms * 0.5) c = DIT_TOO_SHORT;
+        else if (msec < basetime_ms * 1.5) c = DIT_GOOD;
+        else if (msec < basetime_ms * 2) c = DIT_OR_DAH;
+        else if (msec < basetime_ms * 6) c = DAH_GOOD;
+        else c = DAH_TOO_LONG;
     } else {
-	if (msec < basetime_ms * 0.5) c = SPACE_TOO_SHORT;
-	else if (msec < basetime_ms * 1.5) c = SPACE_GOOD;
-	else if (msec < basetime_ms * 2) c = SPACE_TOO_LONG;
-	else if (msec < basetime_ms * 4) c = CHAR_SPACE;
-	else c = WORD_SPACE;
+        if (msec < basetime_ms * 0.5) c = SPACE_TOO_SHORT;
+        else if (msec < basetime_ms * 1.5) c = SPACE_GOOD;
+        else if (msec < basetime_ms * 2) c = SPACE_TOO_LONG;
+        else if (msec < basetime_ms * 4) c = CHAR_SPACE;
+        else c = WORD_SPACE;
     }
 
     if (c != SPACE_GOOD && c != CHAR_SPACE && c != WORD_SPACE) {
-	decode_buffer += c;
+        decode_buffer += c;
     }
 
     if (verbose) {
-	verbose_display(c, msec);
+        verbose_display(c, msec);
     } else {
-	simple_display(c);
+        simple_display(c);
     }
 
     if (c == CHAR_SPACE || c == WORD_SPACE) {
-	decode_buffer = "";
+        decode_buffer = "";
     }
 }
 
 function startTimer(runningTimer, msec) {
     if (runningTimer) {
-	clearTimeout(runningTimer)
+        clearTimeout(runningTimer)
     }
 
     return setTimeout(function() {
-	queue.push({ isTimeout: true });
+        queue.push({ isTimeout: true });
     }, msec);
 }
 
@@ -115,21 +115,21 @@ async function do_main() {
     print("ready.\n\n");
 
     while (true) {
-	const event = await queue.pop();
+        const event = await queue.pop();
 
-	if (event.isTimeout) {
-	    push_status(!last_sw, basetime_ms * 10);
-	    last_sw = !last_sw;
-	    continue;
-	}
+        if (event.isTimeout) {
+            push_status(!last_sw, basetime_ms * 10);
+            last_sw = !last_sw;
+            continue;
+        }
 
-	if (event.state != last_sw) {
-	    push_status(event.state, event.elapsed_time_ms);
-	    last_sw = event.state;
+        if (event.state != last_sw) {
+            push_status(event.state, event.elapsed_time_ms);
+            last_sw = event.state;
 
-	    // invoke timer (for detect timeout)
-	    runningTimer = startTimer(runningTimer, basetime_ms * 10);
-	}
+            // invoke timer (for detect timeout)
+            runningTimer = startTimer(runningTimer, basetime_ms * 10);
+        }
     }
 }
 
