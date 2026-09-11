@@ -4,6 +4,7 @@
 import { EventQueue } from "./queue.js";
 import { HIDDevice } from "./hiddevice.js";
 import { DSRSignal } from "./uart-dsr.js";
+import { SKIFprotocol } from "./uart-skif.js";
 import { table_en, table_jp, Decoder } from "./table.js";
 
 let basetime_ms = 100;
@@ -144,6 +145,7 @@ async function main() {
     decoder = new Decoder((lang == "JP") ? table_jp : table_en);
     verbose = (disp == "verbose");
     if (iface == "dsr") device = new DSRSignal(queue);
+    if (iface == "skif") device = new SKIFprotocol(queue);
     else device = new HIDDevice(queue);
 
     try {
