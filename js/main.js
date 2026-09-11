@@ -24,13 +24,10 @@ const SPACE_TOO_LONG = "!";
 const CHAR_SPACE = "~";
 const WORD_SPACE = "#";
 
+const isDecodeFinish = (c) => ((c == CHAR_SPACE || c == WORD_SPACE))
+
 let decode_buffer = "";
-
 let verbose = false;
-
-function isDecodeFinish(c) {
-    return (c == CHAR_SPACE || c == WORD_SPACE);
-}
 
 function print(str) {
     const output = document.getElementById("output");
