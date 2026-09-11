@@ -35,7 +35,11 @@ function print(str) {
 
     if (!output) return;
 
-    output.textContent += str;
+    if (str == null) {
+        output.textContent = "";
+    } else {
+        output.textContent += str;
+    }
 
     window.scrollTo(0, document.body.scrollHeight);
 }
@@ -109,6 +113,7 @@ function startTimer(runningTimer, msec) {
 async function do_main() {
     let last_sw = -1;
     let runningTimer = null;
+    let firstEvent = true;
 
     while (true) {
         const event = await queue.pop();
@@ -125,6 +130,12 @@ async function do_main() {
 
             // invoke timer (for detect timeout)
             runningTimer = startTimer(runningTimer, basetime_ms * 10);
+        }
+
+        // clear "Ready" status
+        if (firstEvent) {
+            print(null);
+            firstEvent = false;
         }
     }
 }
