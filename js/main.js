@@ -168,7 +168,36 @@ async function main() {
     }
 }
 
+function save()
+{
+    // create filename, log content
+    const date = new Date();
+    const log_date = new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+    }).format(date).replace(/\D/g, '');
+    const log_name = `skif_log_${log_date}.txt`;
+    const log_content = output.textContent;
+
+    // avoid empty log
+    if (!log_content) return;
+
+    const blob = new Blob([log_content], { type: 'text/plain' });
+
+    // save it
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = log_name;
+    a.click();
+
+    URL.revokeObjectURL(a.href);
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     const startBtn = document.getElementById("start-btn");
-    startBtn.addEventListener("click", main);
+    startBtn.addEventListener("click", async () => await main());
+
+    const saveBtn = document.getElementById("save-btn");
+    saveBtn.addEventListener("click", save);
 });
