@@ -10,33 +10,33 @@ export class HIDDevice {
     queue = null;
     keydownHandler = null;
     keyupHandler = null;
-    mousedownHandler = null;
-    mouseupHandler = null;
+    pointerdownHandler = null;
+    pointerupHandler = null;
 
     constructor(eventQueue) {
         this.queue = eventQueue;
     }
 
-    process_press(kind) {
+    process_press(kind, key) {
         const currentTime = performance.now();
-        if (!this.isFirstPress && !event.repeat && !this.lastState) {
+        if (!this.isFirstPress && !this.lastState) {
             this.queue.push({
                 state: this.lastState,
                 elapsed_time_ms: currentTime - this.lastTime
             });
         }
-        if (!event.repeat && !this.lastState) {
+        if (!this.lastState) {
             this.lastState = 1;
-            this.lastKey = event.key
+            this.lastKey = key
             this.lastTime = currentTime;
             this.kind = kind;
             this.isFirstPress = false;
         }
     }
 
-    process_release(kind) {
+    process_release(kind, key) {
         const currentTime = performance.now();
-        if (!this.isFirstPress && event.key == this.lastKey && kind == this.kind && this.lastState) {
+        if (!this.isFirstPress && key == this.lastKey && kind == this.kind && this.lastState) {
             this.queue.push({
                 state: this.lastState,
                 elapsed_time_ms: currentTime - this.lastTime
@@ -50,36 +50,47 @@ export class HIDDevice {
         this.lastState = 0;
         this.isFirstPress = true;
 
+        // disable pointer action
+        document.body.style.userSelect = "none";
+        document.body.style.webkitUserSelect = "none";
+        document.body.style.touchAction = "none";
+
         // event listener for key press
         this.keydownHandler = (event) => {
-            this.process_press("key");
+            // autorepeat event is discarded here
+            event.repeat || this.process_press("key", event.key);
         };
 
         // event listener for key release
         this.keyupHandler = (event) => {
-            this.process_release("key");
+            this.process_release("key", event.key);
         };
 
-        // event listener for mouse press
-        this.mousedownHandler = (event) => {
-            this.process_press("mouse");
+        // event listener for pointer press
+        this.pointerdownHandler = (event) => {
+            this.process_press("pointer", event.pointerId);
         };
 
-        // event listener for mouse release
-        this.mouseupHandler = (event) => {
-            this.process_release("mouse");
+        // event listener for pointer release
+        this.pointerupHandler = (event) => {
+            this.process_release("pointer", event.pointerId);
         };
 
         window.addEventListener('keydown', this.keydownHandler);
         window.addEventListener('keyup', this.keyupHandler);
-        window.addEventListener('mousedown', this.mousedownHandler);
-        window.addEventListener('mouseup', this.mouseupHandler);
+        window.addEventListener('pointerdown', this.pointerdownHandler);
+        window.addEventListener('pointerup', this.pointerupHandler);
     }
 
     async close() {
+        // enable pointer action
+        document.body.style.userSelect = "";
+        document.body.style.webkitUserSelect = "";
+        document.body.style.touchAction = "";
+
         if (this.keydownHandler) window.removeEventListener('keydown', this.keydownHandler);
         if (this.keyupHandler) window.removeEventListener('keyup', this.keyupHandler);
-        if (this.mousedownHandler) window.removeEventListener('mousedown', this.mousedownHandler);
-        if (this.mouseupHandler) window.removeEventListener('mouseup', this.mouseupHandler);
+        if (this.pointerdownHandler) window.removeEventListener('pointerdown', this.pointerdownHandler);
+        if (this.pointerupHandler) window.removeEventListener('pointerup', this.pointerupHandler);
     }
 }
