@@ -132,7 +132,7 @@ export class Decoder {
     }
 
     decode(arg) {
-        const unknown = (this.table == table_en) ? "?" : "�";
+        const unknown = (this.table == table_en) ? "*" : "�";
         return this.table.get(arg) || unknown;
     }
 }
