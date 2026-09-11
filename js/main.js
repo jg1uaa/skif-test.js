@@ -28,7 +28,8 @@ const WORD_SPACE = "#";
 const isDecodeFinish = (c) => ((c == CHAR_SPACE || c == WORD_SPACE))
 
 let decode_buffer = "";
-let verbose = false;
+let display = "";
+let lang = "";
 
 function print(str) {
     const output = document.getElementById("output");
@@ -42,6 +43,17 @@ function print(str) {
     }
 
     window.scrollTo(0, document.body.scrollHeight);
+}
+
+function decode_display(c)
+{
+    if (isDecodeFinish(c)) {
+        print(decoder.decode(decode_buffer));
+    }
+
+    if (c == WORD_SPACE) {
+        print((lang == "JP") ? "　" : " ");
+    }
 }
 
 function simple_display(c)
@@ -89,10 +101,16 @@ function push_status(state, msec) {
         decode_buffer += c;
     }
 
-    if (verbose) {
+    switch (display) {
+    case "decodeonly":
+        decode_display(c);
+        break;
+    case "verbose":
         verbose_display(c, msec);
-    } else {
+        break;
+    default:
         simple_display(c);
+        break;
     }
 
     if (c == CHAR_SPACE || c == WORD_SPACE) {
@@ -125,6 +143,12 @@ async function do_main() {
         }
 
         if (event.state != last_sw) {
+            // clear "Ready" status
+            if (firstEvent) {
+                print(null);
+                firstEvent = false;
+            }
+
             push_status(event.state, event.elapsed_time_ms);
             last_sw = event.state;
 
@@ -132,11 +156,6 @@ async function do_main() {
             runningTimer = startTimer(runningTimer, basetime_ms * 10);
         }
 
-        // clear "Ready" status
-        if (firstEvent) {
-            print(null);
-            firstEvent = false;
-        }
     }
 }
 
@@ -149,12 +168,11 @@ async function main() {
 
     basetime_ms = 1200 / wpm;
 
-    const lang = document.querySelector('input[name="lang"]:checked').value;
-    const disp = document.querySelector('input[name="display"]:checked').value;
+    lang = document.querySelector('input[name="lang"]:checked').value;
+    display = document.querySelector('input[name="display"]:checked').value;
     const iface = document.querySelector('input[name="interface"]:checked').value;
     
     decoder = new Decoder((lang == "JP") ? table_jp : table_en);
-    verbose = (disp == "verbose");
     if (iface == "dsr") device = new DSRSignal(queue);
     if (iface == "skif") device = new SKIFprotocol(queue);
     else device = new HIDDevice(queue);
