@@ -27,6 +27,18 @@ const WORD_SPACE = "#";
 
 const isDecodeFinish = (c) => ((c == CHAR_SPACE || c == WORD_SPACE))
 
+const normal_def = {
+    dit_too_short: 0.5,
+    dit_good: 1.5,
+    dit_or_dah: 2,
+    dah_good: 6,
+    space_too_short: 0.5,
+    space_good: 1.5,
+    space_too_long: 2,
+    char_space: 4
+};
+
+const ddef = normal_def;
 let decode_buffer = "";
 let display = "";
 let lang = "";
@@ -84,16 +96,16 @@ function push_status(state, msec) {
     let c = "";
 
     if(state) {
-        if (msec < basetime_ms * 0.5) c = DIT_TOO_SHORT;
-        else if (msec < basetime_ms * 1.5) c = DIT_GOOD;
-        else if (msec < basetime_ms * 2) c = DIT_OR_DAH;
-        else if (msec < basetime_ms * 6) c = DAH_GOOD;
+        if (msec < basetime_ms * ddef.dit_too_short) c = DIT_TOO_SHORT;
+        else if (msec < basetime_ms * ddef.dit_good) c = DIT_GOOD;
+        else if (msec < basetime_ms * ddef.dit_or_dah) c = DIT_OR_DAH;
+        else if (msec < basetime_ms * ddef.dah_good) c = DAH_GOOD;
         else c = DAH_TOO_LONG;
     } else {
-        if (msec < basetime_ms * 0.5) c = SPACE_TOO_SHORT;
-        else if (msec < basetime_ms * 1.5) c = SPACE_GOOD;
-        else if (msec < basetime_ms * 2) c = SPACE_TOO_LONG;
-        else if (msec < basetime_ms * 4) c = CHAR_SPACE;
+        if (msec < basetime_ms * ddef.space_too_short) c = SPACE_TOO_SHORT;
+        else if (msec < basetime_ms * ddef.space_good) c = SPACE_GOOD;
+        else if (msec < basetime_ms * ddef.space_too_long) c = SPACE_TOO_LONG;
+        else if (msec < basetime_ms * ddef.char_space) c = CHAR_SPACE;
         else c = WORD_SPACE;
     }
 
@@ -137,7 +149,7 @@ async function do_main() {
         const event = await queue.pop();
 
         if (event.isTimeout) {
-            push_status(!last_sw, basetime_ms * 10);
+            push_status(!last_sw, basetime_ms * ddef.char_space);
             last_sw = !last_sw;
             continue;
         }
@@ -153,7 +165,7 @@ async function do_main() {
             last_sw = event.state;
 
             // invoke timer (for detect timeout)
-            runningTimer = startTimer(runningTimer, basetime_ms * 10);
+            runningTimer = startTimer(runningTimer, basetime_ms * ddef.char_space);
         }
 
     }
