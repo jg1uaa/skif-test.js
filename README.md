@@ -12,10 +12,6 @@ Invoke js/main.js from index.html. To use SKIF or DTR/DSR line, WebSerial capabl
 
 See [README.md of skif-test](https://github.com/jg1uaa/skif-test/blob/master/README.md).
 
-## Note
-
-Currently SKIF support is not implemented.
-
 ## License
 
 GPL v3.0 or later
