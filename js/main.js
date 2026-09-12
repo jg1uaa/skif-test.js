@@ -130,27 +130,27 @@ function push_status(state, msec) {
     }
 }
 
-function startTimer(runningTimer, msec) {
-    if (runningTimer) {
-        clearTimeout(runningTimer)
-    }
-
-    return setTimeout(function() {
-        queue.push({ isTimeout: true });
-    }, msec);
-}
-
 async function do_main() {
     let last_sw = -1;
     let runningTimer = null;
     let firstEvent = true;
+    let timerGen = 0;
 
     while (true) {
         const event = await queue.pop();
 
+        // event has come, stop the timer immediately
+        if (runningTimer) {
+            clearTimeout(runningTimer);
+            runningTimer = null;
+        }
+
         if (event.isTimeout) {
-            push_status(!last_sw, basetime_ms * ddef.char_space);
-            last_sw = !last_sw;
+            // only recent timeout event accepted
+            if (event.gen === timerGen) {
+                push_status(!last_sw, basetime_ms * ddef.char_space);
+                last_sw = !last_sw;
+            }
             continue;
         }
 
@@ -165,7 +165,10 @@ async function do_main() {
             last_sw = event.state;
 
             // invoke timer (for detect timeout)
-            runningTimer = startTimer(runningTimer, basetime_ms * ddef.char_space);
+            const currgen = ++timerGen;
+            runningTimer = setTimeout(function() {
+                queue.push({ isTimeout: true, gen: currgen });
+            }, basetime_ms * ddef.char_space);
         }
 
     }
