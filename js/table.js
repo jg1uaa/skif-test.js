@@ -133,6 +133,6 @@ export class Decoder {
 
     decode(arg) {
         const unknown = (this.table == table_en) ? "*" : "＊";
-        return this.table.get(arg) || unknown;
+        return this.table.get(arg.replace(/!/g, '').replace(/X/g, '.')) || unknown;
     }
 }
