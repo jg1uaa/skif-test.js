@@ -36,7 +36,7 @@ const normal_def = {
     space_good: 1.5,
     space_too_long: 2,
     char_space: 4,
-    timeout: 10
+    timeout: 7 // dah_good + 1
 };
 
 const ddef = normal_def;
