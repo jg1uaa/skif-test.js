@@ -35,7 +35,8 @@ const normal_def = {
     space_too_short: 0.5,
     space_good: 1.5,
     space_too_long: 2,
-    char_space: 4
+    char_space: 4,
+    timeout: 10
 };
 
 const ddef = normal_def;
@@ -134,7 +135,6 @@ async function do_main() {
     let last_sw = -1;
     let runningTimer = null;
     let firstEvent = true;
-    let timerGen = 0;
 
     while (true) {
         const event = await queue.pop();
@@ -146,11 +146,9 @@ async function do_main() {
         }
 
         if (event.isTimeout) {
-            // only recent timeout event accepted
-            if (event.gen === timerGen) {
-                push_status(!last_sw, basetime_ms * ddef.char_space);
-                last_sw = !last_sw;
-            }
+            const next_sw = last_sw ? 0 : 1;
+            push_status(next_sw, basetime_ms * ddef.timeout);
+            last_sw = next_sw;
             continue;
         }
 
@@ -163,14 +161,12 @@ async function do_main() {
 
             push_status(event.state, event.elapsed_time_ms);
             last_sw = event.state;
-
-            // invoke timer (for detect timeout)
-            const currgen = ++timerGen;
-            runningTimer = setTimeout(function() {
-                queue.push({ isTimeout: true, gen: currgen });
-            }, basetime_ms * ddef.char_space);
         }
 
+        // invoke timer (for detect timeout)
+        runningTimer = setTimeout(function() {
+            queue.push({ isTimeout: true });
+        }, basetime_ms * ddef.timeout);
     }
 }
 
