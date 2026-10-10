@@ -90,9 +90,11 @@ function simple_display(c)
     }
 }
 
-function verbose_display(c, msec)
+function verbose_display(c, msec, dotratio)
 {
-    print(c + " " + String(msec) + "\n");
+    const n = dotratio ? (msec / basetime_ms) : msec;
+
+    print(c + " " + n.toFixed(3) + "\n");
 
     if (isDecodeFinish(c)) {
         print("* " + decode_buffer + " [" + decoder.decode(decode_buffer) + "]\n\n");
@@ -126,7 +128,10 @@ function push_status(state, msec) {
         decode_display(c);
         break;
     case "verbose":
-        verbose_display(c, msec);
+        verbose_display(c, msec, false);
+        break;
+    case "verbose-dot":
+        verbose_display(c, msec, true);
         break;
     default:
         simple_display(c);
