@@ -24,8 +24,10 @@ const SPACE_GOOD = "_";
 const SPACE_TOO_LONG = "!";
 const CHAR_SPACE = "~";
 const WORD_SPACE = "#";
+const DECODE_TIMEOUT = "|";
 
-const isDecodeFinish = (c) => ((c == CHAR_SPACE || c == WORD_SPACE))
+const isWordSpace = (c) => (c == WORD_SPACE || c == DECODE_TIMEOUT)
+const isDecodeFinish = (c) => (c == CHAR_SPACE || isWordSpace(c))
 
 const normal_def = {
     dit_too_short: 0.5,
@@ -36,7 +38,7 @@ const normal_def = {
     space_good: 1.5,
     space_too_long: 2,
     char_space: 4,
-    timeout: 7 // dah_good + 1
+    timeout: 14 // at least dah_good + 1
 };
 
 const ddef = normal_def;
@@ -64,7 +66,7 @@ function decode_display(c)
         print(decoder.decode(decode_buffer));
     }
 
-    if (c == WORD_SPACE) {
+    if (isWordSpace(c)) {
         print((lang == "JP") ? "　" : " ");
     }
 }
@@ -80,6 +82,10 @@ function simple_display(c)
     }
 
     if (c == WORD_SPACE) {
+        print(" [space] ");
+    }
+
+    if (c == DECODE_TIMEOUT) {
         print("\n");
     }
 }
@@ -107,10 +113,11 @@ function push_status(state, msec) {
         else if (msec < basetime_ms * ddef.space_good) c = SPACE_GOOD;
         else if (msec < basetime_ms * ddef.space_too_long) c = SPACE_TOO_LONG;
         else if (msec < basetime_ms * ddef.char_space) c = CHAR_SPACE;
-        else c = WORD_SPACE;
+        else if (msec < basetime_ms * ddef.timeout) c = WORD_SPACE;
+        else c = DECODE_TIMEOUT;
     }
 
-    if (c != SPACE_GOOD && c != CHAR_SPACE && c != WORD_SPACE) {
+    if (c != SPACE_GOOD && !isDecodeFinish(c)) {
         decode_buffer += c;
     }
 
@@ -126,7 +133,7 @@ function push_status(state, msec) {
         break;
     }
 
-    if (c == CHAR_SPACE || c == WORD_SPACE) {
+    if (isDecodeFinish(c)) {
         decode_buffer = "";
     }
 }
