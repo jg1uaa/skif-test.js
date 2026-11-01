@@ -197,7 +197,7 @@ async function main() {
     
     decoder = new Decoder((lang == "JP") ? table_jp : table_en);
     if (iface == "dsr") device = new DSRSignal(queue);
-    if (iface == "skif") device = new SKIFprotocol(queue);
+    else if (iface == "skif") device = new SKIFprotocol(queue);
     else device = new HIDDevice(queue);
 
     try {
@@ -241,4 +241,29 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const saveBtn = document.getElementById("save-btn");
     saveBtn.addEventListener("click", save);
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has("wpm")) {
+        const wpm_ui = document.getElementById("wpm");
+        if (wpm_ui) wpm_ui.value = urlParams.get("wpm");
+    }
+
+    if (urlParams.has("lang")) {
+        const lang = urlParams.get("lang");
+        const radio = document.querySelector(`input[name="lang"][value="${lang}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    if (urlParams.has("display")) {
+        const display = urlParams.get("display");
+        const radio = document.querySelector(`input[name="display"][value="${display}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    if (urlParams.has("interface")) {
+        const iface = urlParams.get("interface");
+        const radio = document.querySelector(`input[name="interface"][value="${iface}"]`);
+        if (radio) radio.checked = true;
+    }
 });
